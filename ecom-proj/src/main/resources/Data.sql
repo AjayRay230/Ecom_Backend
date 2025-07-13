@@ -1,0 +1,22 @@
+INSERT INTO PRODUCT (id, name, description, price, quantity, category, available, release_date, brand)
+VALUES
+    (1, 'Laptop', '14-inch ultrabook with 16GB RAM', 74999.99, 10, 'Electronics', true, '2024-05-01', 'TechNova'),
+    (2, 'Smartphone', '5G phone with OLED display', 34999.50, 25, 'Electronics', true, '2024-06-15', 'Mobix'),
+    (3, 'Desk Chair', 'Ergonomic mesh chair', 8999.00, 8, 'Furniture', true, '2024-04-10', 'ErgoFit'),
+    (4, 'Bluetooth Speaker', 'Portable waterproof speaker', 2999.75, 30, 'Audio', true, '2023-11-23', 'BoomSound'),
+    (5, 'Notebook', '200 pages ruled notebook', 89.99, 100, 'Stationery', true, '2024-07-01', 'NotePro'),
+    (6, 'T-Shirt', '100% Cotton, size M', 499.00, 50, 'Apparel', true, '2024-01-20', 'StyleFit'),
+    (7, 'Coffee Maker', 'Automatic drip coffee machine', 3999.95, 5, 'Appliances', false, '2023-12-10', 'BrewMate'),
+    (8, 'Headphones', 'Noise-cancelling over-ear headphones', 6999.00, 15, 'Audio', true, '2024-02-05', 'SoundCore'),
+    (9, 'LED Monitor', '24-inch Full HD display', 12499.99, 12, 'Electronics', true, '2024-03-12', 'ViewMaster'),
+    (10, 'Mouse Pad', 'Anti-slip surface, large size', 299.00, 60, 'Accessories', true, '2024-06-01', 'GripMat'),
+    (11, 'Running Shoes', 'Lightweight breathable design', 2199.00, 20, 'Footwear', true, '2024-05-25', 'StrideX'),
+    (12, 'Water Bottle', '1L BPA-free sports bottle', 349.50, 80, 'Lifestyle', true, '2024-03-18', 'HydroPlus'),
+    (13, 'Backpack', 'Laptop backpack with USB charging', 1599.00, 18, 'Accessories', true, '2024-04-27', 'UrbanGear'),
+    (14, 'LED Bulb', '9W cool white LED', 149.00, 100, 'Home', true, '2023-10-10', 'BrightLite'),
+    (15, 'Tablet', '10-inch Android tablet, 64GB', 18999.99, 9, 'Electronics', true, '2024-01-05', 'TabWorld'),
+    (16, 'Wireless Mouse', 'Ergonomic, USB rechargeable', 799.00, 40, 'Accessories', true, '2023-12-20', 'ClickPro'),
+    (17, 'Sunglasses', 'UV-protection, unisex style', 599.00, 35, 'Lifestyle', true, '2024-07-10', 'SunGuard'),
+    (18, 'Electric Kettle', '1.5L stainless steel body', 1499.00, 10, 'Appliances', true, '2024-01-18', 'QuickBoil'),
+    (19, 'Gaming Keyboard', 'Mechanical RGB keyboard', 3499.00, 7, 'Electronics', true, '2024-02-28', 'GameCraft'),
+    (20, 'Desk Lamp', 'LED lamp with adjustable brightness', 999.00, 22, 'Home', true, '2023-09-15', 'LumoLite');
