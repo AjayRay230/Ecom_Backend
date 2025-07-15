@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 @Entity
 @AllArgsConstructor
@@ -22,7 +23,7 @@ public class Product {
     private int quantity;
     private String category;
     private boolean available;
-    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "dd:MM:yyyy")
+    @JsonFormat(shape = JsonFormat.Shape.STRING,pattern = "yyyy-MM-dd")
     @Temporal(TemporalType.DATE)
     private Date releaseDate;
     private String brand;

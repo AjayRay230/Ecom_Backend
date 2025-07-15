@@ -2,8 +2,11 @@ package com.ajay.ecom_proj.controller;
 
 import com.ajay.ecom_proj.model.Product;
 import com.ajay.ecom_proj.service.ProductService;
+import jakarta.validation.Valid;
+import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,8 +41,8 @@ public class ProductController {
     }
 // we are not sure what we are going to return we might return data or status
         @PostMapping("/product")
-      public ResponseEntity<?>  addProduct(@RequestPart Product product ,
-                                                    @RequestPart MultipartFile imageFile)
+      public ResponseEntity<?>  addProduct(@RequestPart("product") @Valid @NonNull Product product ,
+                                                    @RequestPart("imageFile") MultipartFile imageFile)
 
         {
            try {
@@ -55,11 +58,15 @@ public class ProductController {
         
 
     @GetMapping("/product/{id}/image")
-    public ResponseEntity<byte[]> getImageByProductId(@PathVariable int productId )
+    public ResponseEntity<byte[]> getImageByProductId(@PathVariable("id") int productId )
     {
         Product product = service.getProductById(productId);
-        byte[] imageFile = product.getImageData();
-        return ResponseEntity.ok().body(imageFile);
+        if(product == null||product.getImageData()==null)
+            return ResponseEntity.badRequest().build();
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(product.getImageType()))
+                .body(product.getImageData());
 
 
     }
