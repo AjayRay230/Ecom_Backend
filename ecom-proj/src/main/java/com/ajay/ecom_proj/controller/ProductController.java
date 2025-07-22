@@ -41,7 +41,7 @@ public class ProductController {
     }
 // we are not sure what we are going to return we might return data or status
         @PostMapping("/product")
-      public ResponseEntity<?>  addProduct(@RequestPart("product") @Valid @NonNull Product product ,
+      public ResponseEntity<?>  addProduct(@RequestPart("product")  @Valid @NonNull Product product ,
                                                     @RequestPart("imageFile") MultipartFile imageFile)
 
         {
