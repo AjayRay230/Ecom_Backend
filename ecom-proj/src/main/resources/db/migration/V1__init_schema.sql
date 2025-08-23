@@ -1,6 +1,7 @@
 -- USERS table
 CREATE TABLE users (
-                       user_id INT SERIAL PRIMARY KEY,
+                       user_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    ,
                        first_name VARCHAR(100) NOT NULL,
                        last_name VARCHAR(100),
                        password VARCHAR(255) NOT NULL,
@@ -12,7 +13,8 @@ CREATE TABLE users (
 
 -- PRODUCTS table
 CREATE TABLE products (
-                          id INT SERIAL PRIMARY KEY,
+                          id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+
                           name VARCHAR(255) NOT NULL,
                           description TEXT,
                           price DECIMAL(15,2) NOT NULL,
