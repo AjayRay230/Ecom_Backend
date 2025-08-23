@@ -123,7 +123,7 @@ public class UserController {
        List<Users> users = userService.getAllUsers();
        return ResponseEntity.status(HttpStatus.OK).body(users);
     }
-    @GetMapping("/{userId}")
+    @GetMapping("/id/{userId}")
     public ResponseEntity<?> getUserById(@PathVariable int userId) {
         Users user = userService.getUserByUserId(userId);
         if (user == null) {
