@@ -1,13 +1,26 @@
 package com.ajay.ecom_proj.controller;
 
+import com.ajay.ecom_proj.DTO.AuthRequest;
+import com.ajay.ecom_proj.DTO.AuthResponse;
+import com.ajay.ecom_proj.DTO.ProductDTO;
+import com.ajay.ecom_proj.DTO.RegistrationRequest;
+import com.ajay.ecom_proj.mapper.ProductMapper;
 import com.ajay.ecom_proj.model.Product;
+import com.ajay.ecom_proj.model.Users;
+import com.ajay.ecom_proj.repo.ProductRepo;
+import com.ajay.ecom_proj.repo.UserRepo;
+import com.ajay.ecom_proj.service.JWTService;
 import com.ajay.ecom_proj.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -20,85 +33,110 @@ import java.util.List;
 public class ProductController {
     @Autowired
     ProductService service;
+    @Autowired
+    ProductRepo repo;
+    @Autowired
+    private JWTService jWTService;
+    @Autowired
+    private UserRepo userRepo;
     @RequestMapping("/")
     public String greeting() {
-        return "Hello World";
+        return "Hello User you are now using the Ecommerce API Develpoped By Ajay Kumar Ray!!";
     }
     @GetMapping("/product")
-    public ResponseEntity<List<Product>> getAllProducts() {
-        return  new ResponseEntity<>( service.getAllProducts(), HttpStatus.OK);
+    public ResponseEntity<List<ProductDTO>> getAllProducts() {
+       return ResponseEntity.ok(service.getAllProducts());
 
     }
     @GetMapping("/product/{id}")
-    public ResponseEntity<Product> getProduct( @PathVariable int id) {
+    public ResponseEntity<ProductDTO> getProduct( @PathVariable int id) {
 
-        Product product = service.getProductById(id);
+        ProductDTO product = service.getProductById(id);
         if (product != null) {
-            return new ResponseEntity<>(product, HttpStatus.OK);
+            return ResponseEntity.ok(product);
         } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return  ResponseEntity.notFound().build();
         }
     }
 // we are not sure what we are going to return we might return data or status
-        @PostMapping("/product")
-      public ResponseEntity<?>  addProduct(@RequestPart("product")  @Valid @NonNull Product product ,
-                                                    @RequestPart("imageFile") MultipartFile imageFile)
+@PostMapping("/product/add")
+@PreAuthorize("hasRole('ADMIN')")
+public ResponseEntity<?> addProduct(
+        @RequestPart("product") @Valid @NonNull Product product,
+        @RequestPart("imageFile") MultipartFile imageFile,
+        @AuthenticationPrincipal org.springframework.security.core.userdetails.User principal
+)
+{
+    try {
+        // Get logged-in username from Spring Security
+        String username = principal.getUsername();
 
-        {
-           try {
-               Product product1 = service.addProduct(product, imageFile);
-               return new ResponseEntity<>(product1, HttpStatus.CREATED);
-           }
-           catch(Exception e)
-           {
-               return  new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-           }
-
+        // Fetch full Users entity from DB
+        Users user = userRepo.findByUserName(username);
+        if (user == null) {
+            return new ResponseEntity<>("User not found", HttpStatus.UNAUTHORIZED);
         }
-        
+
+        // Attach the logged-in user to the product
+        product.setUser(user);
+
+        // Save product (with image)
+        ProductDTO product1 = service.addProduct(product, imageFile);
+        return new ResponseEntity<>(product1, HttpStatus.CREATED);
+
+    } catch (Exception e) {
+        e.printStackTrace();
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+    }
+}
+
 
     @GetMapping("/product/{id}/image")
     public ResponseEntity<byte[]> getImageByProductId(@PathVariable("id") int productId )
     {
-        Product product = service.getProductById(productId);
+        Product product = service.getProductEntity(productId);
         if(product == null||product.getImageData()==null)
-            return ResponseEntity.badRequest().build();
-
+            return ResponseEntity.notFound().build();
+    String contentType = product.getImageType()!=null?product.getImageType():"application/octet-stream";
         return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(product.getImageType()))
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + product.getImageName() + "\"")
                 .body(product.getImageData());
 
 
     }
     @PutMapping("/product/{id}")
-    public ResponseEntity<String>  updateProduct(@PathVariable int id, @RequestPart Product product,@RequestPart MultipartFile imageFile) throws IOException {
-        Product product1 = service.updateProduct(id,product,imageFile);
-        if (product1 != null) {
-            return new ResponseEntity<>(product1.getName(), HttpStatus.OK);
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?>  updateProduct(@PathVariable int id, @RequestPart Product product,@RequestPart MultipartFile imageFile) throws IOException {
+        try{
+            ProductDTO updatedProduct = service.updateProduct(id, product, imageFile);
+            if(updatedProduct != null)
+            {
+                return ResponseEntity.ok(updatedProduct);
+            }
+            return   ResponseEntity.notFound().build();
         }
-        else  {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        catch(Exception e)
+            {
+            e.printStackTrace();
+            return new  ResponseEntity<>( "Error updating Product ",HttpStatus.BAD_REQUEST);
+            }
     }
     @DeleteMapping("/product/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> deleteProduct(@PathVariable int id)
     {
-        Product product = service.getProductById(id);
-        if(product != null) {
-            service.deleteProduct(id);
-            return new ResponseEntity<>("Deleted",HttpStatus.OK);
+        if(service.deleteProduct(id)){
+            return ResponseEntity.ok("Product deleted successfully");
         }
-        else
-        {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return  ResponseEntity.notFound().build();
     }
     @GetMapping("/product/search")
 
-    public ResponseEntity<List<Product>> searchProduct(String keyword) {
+    public ResponseEntity<List<ProductDTO>> searchProduct(String keyword) {
         System.out.println("searching with..." + keyword);
-        List<Product>  products = service.searchProducts(keyword);
-        return new ResponseEntity<>(products, HttpStatus.OK);
+
+        return ResponseEntity.ok(service.searchProducts(keyword));
     }
 
 }

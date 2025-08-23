@@ -11,7 +11,7 @@ Features:
 
 * RESTful APIs for product management
 * In-memory H2 database
-* Auto-loaded sample data using data.sql
+* Auto-loaded sample data using flyway
 * Image support (imageName, imageType, imageData)
 * CORS enabled for React frontend
 
@@ -54,6 +54,6 @@ Image Fields (in each product):
 * imageType: The MIME type (e.g. "image/png")
 * imageData: The image binary stored as Base64 or byte\[]
 
-Sample SQL (data.sql):
+Sample SQL (V1__init.sql):
 Sample product data is loaded automatically from src/main/resources/data.sql when the app starts.
 

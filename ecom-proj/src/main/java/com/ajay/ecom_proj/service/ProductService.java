@@ -1,5 +1,7 @@
 package com.ajay.ecom_proj.service;
 
+import com.ajay.ecom_proj.DTO.ProductDTO;
+import com.ajay.ecom_proj.mapper.ProductMapper;
 import com.ajay.ecom_proj.model.Product;
 import com.ajay.ecom_proj.repo.ProductRepo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,42 +13,80 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 public class ProductService {
     @Autowired
     ProductRepo repo;
-    public List<Product> getAllProducts() {
-        return repo.findAll();
+    @Autowired
+    ProductMapper mapper;
+    public List<ProductDTO> getAllProducts() {
+//        System.out.println("Get all products :"+ repo.findAll());
+        return repo.findAll()
+                .stream()
+                .map(ProductMapper::toDTO)
+                .collect(Collectors.toList());
     }
 
-    public Product getProductById(  int id) {
+    public ProductDTO getProductById(  int id) {
+        return repo.findById(id)
+                .map(ProductMapper::toDTO)
+                .orElse(null);
+
+    }
+
+    public ProductDTO addProduct(Product product, MultipartFile imageFile) throws IOException {
+        if( imageFile!=null && !imageFile.isEmpty() ) {
+            product.setImageName(imageFile.getOriginalFilename());
+            product.setImageType(imageFile.getContentType());
+            product.setImageData(imageFile.getBytes());
+        }
+        Product saved  = repo.save(product);
+        return mapper.toDTO(saved);
+    }
+
+
+    public ProductDTO updateProduct(int id, Product product, MultipartFile imageFile) throws IOException {
+      Product existingProduct = repo.findById(id).orElse(null);
+      if(existingProduct==null) {
+          return null;
+      }
+        existingProduct.setName(product.getName());
+        existingProduct.setDescription(product.getDescription());
+        existingProduct.setPrice(product.getPrice());
+        existingProduct.setQuantity(product.getQuantity());
+        existingProduct.setCategory(product.getCategory());
+        existingProduct.setAvailable(product.isAvailable());
+        existingProduct.setReleaseDate(product.getReleaseDate());
+        existingProduct.setBrand(product.getBrand());
+        if(imageFile!=null && !imageFile.isEmpty())
+        {
+            existingProduct.setImageData(imageFile.getBytes());
+            existingProduct.setImageType(imageFile.getContentType());
+            existingProduct.setImageName(imageFile.getOriginalFilename());
+        }
+       Product saved = repo.save(existingProduct);
+        return mapper.toDTO(saved);
+    }
+
+    public boolean deleteProduct(int id) {
+       if(repo.existsById(id)) {
+           repo.deleteById(id);
+           return true;
+
+       }
+       return false;
+    }
+
+    public List<ProductDTO> searchProducts(String keyword) {
+       return repo.searchProduct(keyword).stream().map(ProductMapper::toDTO).collect(Collectors.toList());
+
+    }
+    public Product getProductEntity(int id) {
         return repo.findById(id).orElse(null);
-
     }
 
-    public Product addProduct(Product product, MultipartFile imageFile) throws IOException {
-        product.setImageName(imageFile.getOriginalFilename());
-        product.setImageType(imageFile.getContentType());
-        product.setImageData(imageFile.getBytes());
-        return repo.save(product);
-    }
-
-
-    public Product updateProduct(int id, Product product, MultipartFile imageFile) throws IOException {
-       product.setImageData(imageFile.getBytes());
-       product.setImageName(imageFile.getOriginalFilename());
-       product.setImageType(imageFile.getContentType());
-        return  repo.save(product);
-
-    }
-
-    public void deleteProduct(int id) {
-        repo.deleteById(id);
-    }
-
-    public List<Product> searchProducts(String keyword) {
-        return repo.searchProduct(keyword);
-
-    }
 }
 
