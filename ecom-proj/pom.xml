@@ -126,12 +126,10 @@
                 <groupId>org.flywaydb</groupId>
                 <artifactId>flyway-maven-plugin</artifactId>
                 <version>11.7.2</version>
-                <configuration>
-                    <url>jdbc:postgresql://dpg-d2jpc62li9vc73dh6bag-a:5432/stocksim_db</url>
-                    <user>ajay</user>
-                    <password>z0v2QCGRzQCesWLgTe0H3LtkG0ykFZa</password>
-                </configuration>
+
             </plugin>
+
+
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

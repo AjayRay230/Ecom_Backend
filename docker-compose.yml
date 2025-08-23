@@ -1,36 +1,29 @@
-
+version: '3.8'
 services:
-  mysql:
-    image: mysql:8.1
-    container_name: mysql_container
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: stock_simulator
-      MYSQL_USER: ajay
-      MYSQL_PASSWORD: ajaypassword
-    ports:
-      - "3307:3306"
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    volumes:
-      - mysql_data:/var/lib/mysql
-
   springboot_app:
     build: .
     container_name: springboot_app
-    depends_on:
-      mysql:
-        condition: service_healthy
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql_container:3306/stock_simulator?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-      SPRING_DATASOURCE_USERNAME: ajay
-      SPRING_DATASOURCE_PASSWORD: ajaypassword
-    restart: on-failure
+      DB_URL: jdbc:postgresql://postgres:5432/ecom_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      JWT_SECRET: mysecretkey
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15
+    container_name: ecom_postgres
+    environment:
+      POSTGRES_DB: ecom_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
-  mysql_data:
+  postgres_data:

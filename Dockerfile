@@ -1,23 +1,30 @@
-# 1. Use Maven to build the project
+# ==============================
+# 1. Build stage using Maven
+# ==============================
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
 
-# Copy only pom.xml first (for dependency caching)
-COPY ecom-proj/pom.xml .
-RUN mvn dependency:go-offline
+# Copy only pom.xml first for dependency caching
+COPY ecom-proj/pom.xml ./pom.xml
+RUN mvn dependency:go-offline -B
 
-# Copy the source code
+# Copy source code
 COPY ecom-proj/src ./src
 
-# Build the application (skip tests for faster build)
-RUN mvn clean package -DskipTests
+# Build the app (skip tests for faster build)
+RUN mvn clean package -DskipTests -B
 
-# 2. Use JDK image to run the app
+# ==============================
+# 2. Run stage using JDK
+# ==============================
 FROM eclipse-temurin:21-jdk
 WORKDIR /app
 
-# Copy the built JAR from the builder stage
+# Copy built jar
 COPY --from=build /app/target/*.jar app.jar
 
-# Run the Spring Boot app
+# Expose port
+EXPOSE 8080
+
+# Run Spring Boot app
 ENTRYPOINT ["java", "-jar", "app.jar"]
