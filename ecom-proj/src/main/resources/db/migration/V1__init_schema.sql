@@ -1,6 +1,6 @@
 -- USERS table
 CREATE TABLE users (
-                       user_id INT AUTO_INCREMENT PRIMARY KEY,
+                       user_id INT SERIAL PRIMARY KEY,
                        first_name VARCHAR(100) NOT NULL,
                        last_name VARCHAR(100),
                        password VARCHAR(255) NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE users (
 
 -- PRODUCTS table
 CREATE TABLE products (
-                          id INT AUTO_INCREMENT PRIMARY KEY,
+                          id INT SERIAL PRIMARY KEY,
                           name VARCHAR(255) NOT NULL,
                           description TEXT,
                           price DECIMAL(15,2) NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE products (
                           brand VARCHAR(100),
                           image_name VARCHAR(255),
                           image_type VARCHAR(100),
-                          image_data LONGBLOB,
+                          image_data BYTEA,
 
     -- Foreign key to USERS
                           user_id INT,
