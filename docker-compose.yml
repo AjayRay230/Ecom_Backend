@@ -9,7 +9,7 @@ services:
       DB_URL: jdbc:postgresql://postgres:5432/ecom_db
       DB_USER: postgres
       DB_PASSWORD: postgres
-      JWT_SECRET: mysecretkey
+      JWT_SECRET: mylocalsecret12345678901234567890
     depends_on:
       - postgres
 
