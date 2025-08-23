@@ -22,37 +22,49 @@ import java.io.IOException;
 @Component
 public class JWTFilter  extends OncePerRequestFilter {
     @Autowired
-     private JWTService jwtService;
-     @Autowired
+    private JWTService jwtService;
+
+    @Autowired
     ApplicationContext applicationContext;
+
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain) throws IOException, ServletException {
         String authHeader = request.getHeader("Authorization");
         String token = null;
         String username = null;
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
 
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
             token = authHeader.substring(7);
-            username = jwtService.extractUsername(token);
-            System.out.println("Auth header = " + authHeader);
+            try {
+                username = jwtService.extractUsername(token);
+                System.out.println("Auth header = " + authHeader);
+            } catch (Exception e) {
+                // ✅ Handle malformed/expired/invalid JWT safely
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("Invalid or expired token");
+                return;
+            }
         }
+
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            try{
-                UserDetails userDetails = applicationContext.getBean(MyUserDetailsService.class).loadUserByUsername(username);
-                if(jwtService.validateToken(token,userDetails))
-                {
-                    UsernamePasswordAuthenticationToken  authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            try {
+                UserDetails userDetails = applicationContext.getBean(MyUserDetailsService.class)
+                        .loadUserByUsername(username);
+
+                if (jwtService.validateToken(token, userDetails)) {
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                     authentication.setDetails(authentication.getDetails());
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 }
-            }
-            catch(Exception e){
-               response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-               response.getWriter().write("user no longer exist in the system");
-               return;
-
+            } catch (Exception e) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("user no longer exist in the system");
+                return;
             }
         }
-        filterChain.doFilter(request,response);
+        filterChain.doFilter(request, response);
     }
 }
