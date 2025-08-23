@@ -33,14 +33,16 @@ public class SpringConfig {
     private UserDetailsService userDetailsService;
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        return  http.cors(Customizer.withDefaults())
-                .csrf(csrf->csrf.disable())
-                .headers(headers->headers
-                        .frameOptions(frameOptions->frameOptions.disable()))
-                .authorizeHttpRequests(auth->auth.requestMatchers("/h2-console/**","/api/user/login","/api/user/register").permitAll()
-                        .requestMatchers("/api/product/**","/api/user/**").hasRole("ADMIN").anyRequest().authenticated())
+        return http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
+                .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/h2-console/**", "/api/user/login", "/api/user/register").permitAll()
+                        .requestMatchers("/api/product/**", "/api/user/**").hasRole("ADMIN")
+                        .anyRequest().authenticated())
                 .httpBasic(Customizer.withDefaults())
-                .sessionManagement(session->session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
 
