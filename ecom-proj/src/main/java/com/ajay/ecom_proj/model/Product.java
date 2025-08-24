@@ -35,7 +35,7 @@ public class Product {
     private String imageType;
     @Lob
     @Basic(fetch = FetchType.LAZY)
-    @Column(name = "image_data", columnDefinition = "LONGBLOB")
+    @Column(name = "image_data")
     private byte[] imageData;
     @ManyToOne
     @JoinColumn(name = "user_id") // FK column in product table

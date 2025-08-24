@@ -140,7 +140,7 @@ public ResponseEntity<?> addProduct(
     }
     @GetMapping("/product/search")
 
-    public ResponseEntity<List<ProductDTO>> searchProduct(String keyword) {
+    public ResponseEntity<List<ProductDTO>> searchProduct( @RequestParam  String keyword) {
         System.out.println("searching with..." + keyword);
 
         return ResponseEntity.ok(service.searchProducts(keyword));

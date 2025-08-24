@@ -28,9 +28,14 @@ public class ProductMapper {
         dto.setAvailable(product.isAvailable());
         dto.setReleaseDate(product.getReleaseDate()); // direct mapping (LocalDate)
         dto.setBrand(product.getBrand());
+        if(product.getImageData() != null && product.getImageData().length > 0) {
+            dto.setImageUrl("/api/product/" + product.getId() +  "/image");
+        }
+        else
+        {
+            dto.setImageUrl(null);
+        }
 
-        // If you expose images via endpoint `/product/{id}/image`
-        dto.setImageUrl("/api/product/" + product.getId() + "/image");
         if(product.getUser()!=null)
         {
             dto.setCreatedBy(product.getUser().getUserName());
