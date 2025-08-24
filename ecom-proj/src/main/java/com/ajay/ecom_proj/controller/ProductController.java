@@ -11,6 +11,7 @@ import com.ajay.ecom_proj.repo.ProductRepo;
 import com.ajay.ecom_proj.repo.UserRepo;
 import com.ajay.ecom_proj.service.JWTService;
 import com.ajay.ecom_proj.service.ProductService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.NonNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,34 +60,46 @@ public class ProductController {
         }
     }
 // we are not sure what we are going to return we might return data or status
-@PostMapping("/product/add")
+@PostMapping(
+        value = "/product/add",
+        consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
+)
 @PreAuthorize("hasRole('ADMIN')")
 public ResponseEntity<?> addProduct(
-        @RequestPart("product") @Valid @NonNull Product product,
+        @RequestPart("product") Object productPart,   // <-- can be JSON object or String
         @RequestPart("imageFile") MultipartFile imageFile,
         @AuthenticationPrincipal org.springframework.security.core.userdetails.User principal
-)
-{
+) {
     try {
-        // Get logged-in username from Spring Security
-        String username = principal.getUsername();
+        Product product;
 
-        // Fetch full Users entity from DB
-        Users user = userRepo.findByUserName(username);
-        if (user == null) {
-            return new ResponseEntity<>("User not found", HttpStatus.UNAUTHORIZED);
+        // Handle both cases (frontend sending JSON directly or as Blob)
+        if (productPart instanceof String productJson) {
+            ObjectMapper mapper = new ObjectMapper();
+            product = mapper.readValue(productJson, Product.class);
+        } else if (productPart instanceof Product p) {
+            product = p;
+        } else {
+            return ResponseEntity.badRequest().body("Invalid product data");
         }
 
-        // Attach the logged-in user to the product
+        // Get logged-in user
+        String username = principal.getUsername();
+        Users user = userRepo.findByUserName(username);
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+        }
+
+        // Attach logged-in user
         product.setUser(user);
 
-        // Save product (with image)
+        // Save product
         ProductDTO product1 = service.addProduct(product, imageFile);
-        return new ResponseEntity<>(product1, HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(product1);
 
     } catch (Exception e) {
         e.printStackTrace();
-        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error adding product");
     }
 }
 
