@@ -60,48 +60,42 @@ public class ProductController {
         }
     }
 // we are not sure what we are going to return we might return data or status
+
+
 @PostMapping(
         value = "/product/add",
-        consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
+        consumes = MediaType.MULTIPART_FORM_DATA_VALUE
 )
 @PreAuthorize("hasRole('ADMIN')")
 public ResponseEntity<?> addProduct(
-        @RequestPart("product") Object productPart,   // <-- can be JSON object or String
+        @RequestPart("product") String productJson,   // get JSON string
         @RequestPart("imageFile") MultipartFile imageFile,
         @AuthenticationPrincipal org.springframework.security.core.userdetails.User principal
 ) {
     try {
-        Product product;
+        // Convert JSON -> Product
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.findAndRegisterModules(); // handle LocalDate properly
+        Product product = mapper.readValue(productJson, Product.class);
 
-        // Handle both cases (frontend sending JSON directly or as Blob)
-        if (productPart instanceof String productJson) {
-            ObjectMapper mapper = new ObjectMapper();
-            product = mapper.readValue(productJson, Product.class);
-        } else if (productPart instanceof Product p) {
-            product = p;
-        } else {
-            return ResponseEntity.badRequest().body("Invalid product data");
-        }
-
-        // Get logged-in user
+        // Attach logged-in user
         String username = principal.getUsername();
         Users user = userRepo.findByUserName(username);
         if (user == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
         }
-
-        // Attach logged-in user
         product.setUser(user);
 
         // Save product
-        ProductDTO product1 = service.addProduct(product, imageFile);
-        return ResponseEntity.status(HttpStatus.CREATED).body(product1);
+        ProductDTO saved = service.addProduct(product, imageFile);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
 
     } catch (Exception e) {
         e.printStackTrace();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error adding product");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error adding product: " + e.getMessage());
     }
 }
+
 
 
     @GetMapping("/product/{id}/image")
