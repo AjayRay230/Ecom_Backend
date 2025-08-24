@@ -43,6 +43,10 @@ public class ProductService {
             product.setImageType(imageFile.getContentType());
             product.setImageData(imageFile.getBytes());
         }
+        else
+        {
+            product.setImageData(null);
+        }
         Product saved  = repo.save(product);
         return mapper.toDTO(saved);
     }
