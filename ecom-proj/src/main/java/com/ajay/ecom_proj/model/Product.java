@@ -36,6 +36,7 @@ public class Product {
     @Lob
     @Basic(fetch = FetchType.LAZY)
     @Column(name = "image_data", columnDefinition = "BYTEA")
+    @com.fasterxml.jackson.annotation.JsonIgnore   // ✅ Prevent Jackson from writing 0 to DB
     private byte[] imageData;
     @ManyToOne
     @JoinColumn(name = "user_id") // FK column in product table
