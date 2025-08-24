@@ -35,7 +35,7 @@ public class Product {
     private String imageType;
     @Lob
     @Basic(fetch = FetchType.LAZY)
-    @Column(name = "image_data", columnDefinition = "BYTEA")
+    @Column(name = "image_data", columnDefinition = "BYTEA",nullable = true)
     @com.fasterxml.jackson.annotation.JsonIgnore   // ✅ Prevent Jackson from writing 0 to DB
     private byte[] imageData;
     @ManyToOne
