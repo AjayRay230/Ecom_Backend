@@ -71,11 +71,11 @@ public class ProductController {
             @AuthenticationPrincipal org.springframework.security.core.userdetails.User principal
     ) {
         try {
-            // Convert JSON string to Product object
+
             ObjectMapper objectMapper = new ObjectMapper();
             Product product = objectMapper.readValue(productJson, Product.class);
 
-            // Attach logged-in user
+
             String username = principal.getUsername();
             Users user = userRepo.findByUserName(username);
             if (user == null) {
