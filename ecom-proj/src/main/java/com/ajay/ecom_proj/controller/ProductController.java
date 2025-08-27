@@ -40,6 +40,8 @@ public class ProductController {
     private JWTService jWTService;
     @Autowired
     private UserRepo userRepo;
+    @Autowired
+    private ProductMapper mapper;
     @RequestMapping("/")
     public String greeting() {
         return "Hello User you are now using the Ecommerce API Develpoped By Ajay Kumar Ray!!";
@@ -62,22 +64,14 @@ public class ProductController {
 // we are not sure what we are going to return we might return data or status
 
 
-@PostMapping(
-        value = "/product/add",
-        consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-)
+@PostMapping("/product/add")
 @PreAuthorize("hasRole('ADMIN')")
 public ResponseEntity<?> addProduct(
-        @RequestPart("product") String productJson,   // get JSON string
-        @RequestPart("imageFile") MultipartFile imageFile,
+        @RequestPart("product") Product product,
+        @RequestPart(value = "imageFile", required = false) MultipartFile imageFile,
         @AuthenticationPrincipal org.springframework.security.core.userdetails.User principal
 ) {
     try {
-        // Convert JSON -> Product
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.findAndRegisterModules(); // handle LocalDate properly
-        Product product = mapper.readValue(productJson, Product.class);
-
         // Attach logged-in user
         String username = principal.getUsername();
         Users user = userRepo.findByUserName(username);
@@ -95,7 +89,6 @@ public ResponseEntity<?> addProduct(
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error adding product: " + e.getMessage());
     }
 }
-
 
 
     @GetMapping("/product/{id}/image")
