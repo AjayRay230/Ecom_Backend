@@ -63,32 +63,35 @@ public class ProductController {
     }
 // we are not sure what we are going to return we might return data or status
 
+    @PostMapping(value = "/product/add", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> addProduct(
+            @RequestPart("product") String productJson,
+            @RequestPart(value = "imageFile", required = false) MultipartFile imageFile,
+            @AuthenticationPrincipal org.springframework.security.core.userdetails.User principal
+    ) {
+        try {
+            // Convert JSON string to Product object
+            ObjectMapper objectMapper = new ObjectMapper();
+            Product product = objectMapper.readValue(productJson, Product.class);
 
-@PostMapping("/product/add")
-@PreAuthorize("hasRole('ADMIN')")
-public ResponseEntity<?> addProduct(
-        @RequestPart("product") Product product,
-        @RequestPart(value = "imageFile", required = false) MultipartFile imageFile,
-        @AuthenticationPrincipal org.springframework.security.core.userdetails.User principal
-) {
-    try {
-        // Attach logged-in user
-        String username = principal.getUsername();
-        Users user = userRepo.findByUserName(username);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+            // Attach logged-in user
+            String username = principal.getUsername();
+            Users user = userRepo.findByUserName(username);
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not found");
+            }
+            product.setUser(user);
+
+            // Save product
+            ProductDTO saved = service.addProduct(product, imageFile);
+            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error adding product: " + e.getMessage());
         }
-        product.setUser(user);
-
-        // Save product
-        ProductDTO saved = service.addProduct(product, imageFile);
-        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-
-    } catch (Exception e) {
-        e.printStackTrace();
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error adding product: " + e.getMessage());
     }
-}
 
 
     @GetMapping("/product/{id}/image")
