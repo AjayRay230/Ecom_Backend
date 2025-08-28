@@ -7,14 +7,11 @@ services:
     dockerContext: .
     dockerFilePath: Dockerfile
     envVars:
-      - key: DB_URL
-        value: jdbc:postgresql://ep-cool-cloud-a17yph9i-pooler.ap-southeast-1.aws.neon.tech:5432/Ecom_db?sslmode=require&channel_binding=require
-      - key: DB_USER
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:postgresql://ep-cool-cloud-a17yph9i-pooler.ap-southeast-1.aws.neon.tech:5432/Ecom_db?sslmode=require
+      - key: SPRING_DATASOURCE_USERNAME
         value: neondb_owner
-      - key: DB_PASSWORD
+      - key: SPRING_DATASOURCE_PASSWORD
         value: npg_X0hBqiVM5zPl
       - key: JWT_SECRET
         value: G7d9X4vQ2mN8sL1bR5kT0wY6pZ3uF8hJ1aC9eV2rB4qM7nK0xS6yL5tP8oD3gH1
-    routes:
-      - type: web
-        path: /
