@@ -16,6 +16,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,6 +33,8 @@ public class UserController {
     private JWTService jwtService;
     @Autowired
     private UserService userService;
+    @Autowired
+    PasswordEncoder encoder;
     @GetMapping("/greeting")
     public String greeting(){
         return "Hello User you are inside the user controller api of ecom project";
@@ -63,39 +67,29 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> loginUser(@RequestBody AuthRequest request)
-    {
-        try {
-            Users user = userRepo.findByUserName(request.getUsername());
-            if(user == null)
-            {
-                return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username ");
-            }
-            if(!user.getPassword().equals(request.getPassword()))
-            {
-                return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid password");
-            }
-            if(!user.getEmail().equals(request.getEmail()))
-            {
-                return  ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email");
-            }
-            Authentication authentication = new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword());
-            String token =  jwtService.generateToken(user);
-            return ResponseEntity.ok(new AuthResponse(
-                    token,
-                    (long) user.getUserId(),
-                    user.getRole(),
-
-                    user.getLastName(),
-                    user.getFirstName(),
-                    user.getEmail()
-
-            ));
+    public ResponseEntity<?> loginUser(@RequestBody AuthRequest request) {
+        Users user = userRepo.findByUserName(request.getUsername());
+        if (user == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
-        catch (BadCredentialsException e)
-        {
-            return   ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid  password");
+
+        if (!encoder.matches(request.getPassword(), user.getPassword())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
+
+        if (!user.getEmail().equalsIgnoreCase(request.getEmail())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
+
+        String token = jwtService.generateToken(user);
+        return ResponseEntity.ok(new AuthResponse(
+                token,
+                (long) user.getUserId(),
+                user.getRole(),
+                user.getLastName(),
+                user.getFirstName(),
+                user.getEmail()
+        ));
     }
 
     @PreAuthorize("hasRole('ADMIN')")

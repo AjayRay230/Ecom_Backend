@@ -39,7 +39,7 @@ public class SpringConfig {
                 .csrf(csrf -> csrf.disable())
                 .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.disable()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/h2-console/**", "/api/user/login", "/api/user/register").permitAll()
+                        .requestMatchers("/h2-console/**", "/api/user/login", "/api/user/register","/api/product/*/image","/api/product/search/**","/api/product/**").permitAll()
                         // 👇 self-service user endpoints
                         .requestMatchers(HttpMethod.DELETE, "/api/user/me").hasAnyRole("USER", "ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/user/me").hasAnyRole("USER", "ADMIN")

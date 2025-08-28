@@ -13,12 +13,16 @@ import java.util.List;
 public interface ProductRepo extends JpaRepository<Product,Integer> {
 //if the user wants to search by brand
     //JPQL query
-    @Query("SELECT p from Product p where "  +
-            "LOWER(p.name) LIKE LOWER(CONCAT( '%' ,:keyword ,'%')) OR " +
-      "LOWER(p.description) LIKE LOWER(CONCAT( '%' ,:keyword ,'%')) OR "
-       + "LOWER(p.brand) LIKE LOWER(CONCAT( '%' ,:keyword ,'%')) OR "
-    +  "LOWER(p.category) LIKE LOWER(CONCAT( '%' ,:keyword ,'%'))  ")
-      List<Product> searchProduct(@Param("keyword") String keyword);
+@Query("SELECT DISTINCT p FROM Product p " +
+        "WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+        "OR LOWER(p.description) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+        "OR LOWER(p.brand) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+        "OR LOWER(p.category) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+        "OR p.category IN (SELECT DISTINCT p2.category FROM Product p2 " +
+        "WHERE LOWER(p2.name) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+        "OR LOWER(p2.description) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+        "OR LOWER(p2.brand) LIKE LOWER(CONCAT('%', :keyword, '%'))) ")
+List<Product> searchProduct(@Param("keyword") String keyword);
 
 
 

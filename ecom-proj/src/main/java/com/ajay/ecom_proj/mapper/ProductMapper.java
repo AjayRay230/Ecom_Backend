@@ -1,15 +1,9 @@
 package com.ajay.ecom_proj.mapper;
 
-
-
-
-
 import com.ajay.ecom_proj.DTO.ProductDTO;
 import com.ajay.ecom_proj.model.Product;
 import org.springframework.stereotype.Component;
 
-import java.time.ZoneId;
-import java.util.Date;
 @Component
 public class ProductMapper {
 
@@ -26,18 +20,13 @@ public class ProductMapper {
         dto.setQuantity(product.getQuantity());
         dto.setCategory(product.getCategory());
         dto.setAvailable(product.isAvailable());
-        dto.setReleaseDate(product.getReleaseDate()); // direct mapping (LocalDate)
+        dto.setReleaseDate(product.getReleaseDate());
         dto.setBrand(product.getBrand());
-        if(product.getImageData() != null && product.getImageData().length > 0) {
-            dto.setImageUrl("/api/product/" + product.getId() +  "/image");
-        }
-        else
-        {
-            dto.setImageUrl(null);
-        }
 
-        if(product.getUser()!=null)
-        {
+        // ✅ map Cloudinary URL directly
+        dto.setImageUrl(product.getImageUrl());
+
+        if (product.getUser() != null) {
             dto.setCreatedBy(product.getUser().getUserName());
         }
         return dto;
@@ -56,10 +45,12 @@ public class ProductMapper {
         product.setQuantity(dto.getQuantity());
         product.setCategory(dto.getCategory());
         product.setAvailable(dto.isAvailable());
-        product.setReleaseDate(dto.getReleaseDate()); // direct mapping (LocalDate)
+        product.setReleaseDate(dto.getReleaseDate());
         product.setBrand(dto.getBrand());
 
-        // ⚠️ image is not set here — handled via MultipartFile in controller
+        // ✅ map back Cloudinary URL
+        product.setImageUrl(dto.getImageUrl());
+
         return product;
     }
 }

@@ -10,7 +10,6 @@ CREATE TABLE users (
                        time_stamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- PRODUCTS table
 CREATE TABLE products (
                           id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                           name VARCHAR(255) NOT NULL,
@@ -21,9 +20,9 @@ CREATE TABLE products (
                           available BOOLEAN NOT NULL,
                           release_date DATE,
                           brand VARCHAR(100),
-                          image_name VARCHAR(255),
-                          image_type VARCHAR(100),
-                          image_data BYTEA,
+
+    -- ✅ Cloudinary or backend-hosted image URL
+                          image_url TEXT,
 
     -- Foreign key to USERS
                           user_id INT,
@@ -31,3 +30,4 @@ CREATE TABLE products (
                               REFERENCES users(user_id)
                               ON DELETE CASCADE
 );
+ALTER TABLE products ADD COLUMN image_public_id VARCHAR(255);

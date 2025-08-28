@@ -1,29 +1,32 @@
-version: '3.8'
 services:
-  springboot_app:
-    build: .
-    container_name: springboot_app
-    ports:
-      - "8080:8080"
-    environment:
-      DB_URL: jdbc:postgresql://postgres:5432/ecom_db
-      DB_USER: postgres
-      DB_PASSWORD: postgres
-      JWT_SECRET: mylocalsecret12345678901234567890
-    depends_on:
-      - postgres
-
   postgres:
     image: postgres:15
     container_name: ecom_postgres
     environment:
-      POSTGRES_DB: ecom_db
+      POSTGRES_DB: ecomdb
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: password
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  app:
+    build: .
+    container_name: springboot_app
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ecomdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: password
+      JWT_SECRET: mysupersecretjwtkeymysupersecretjwtkey
+
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+    ports:
+      - "8080:8080"
 
 volumes:
   postgres_data:

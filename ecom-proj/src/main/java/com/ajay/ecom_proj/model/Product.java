@@ -31,13 +31,9 @@ public class Product {
     private LocalDate releaseDate;
 
     private String brand;
-    private String imageName;
-    private String imageType;
-    @Lob
-    @Basic(fetch = FetchType.LAZY)
-    @Column(name = "image_data", columnDefinition = "bytea",nullable = true)
-    @com.fasterxml.jackson.annotation.JsonIgnore   // ✅ Prevent Jackson from writing 0 to DB
-    private byte[] imageData;
+
+    private String imageUrl;
+    private String imagePublicId;
     @ManyToOne
     @JoinColumn(name = "user_id") // FK column in product table
     @JsonBackReference
